@@ -29,6 +29,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def initial():
+    print("This is a debug message")
+    print("Image height: ", img_height)
     return render_template("index.html", msg="Initial")
 
 @app.route("/predict", methods=["POST"])
