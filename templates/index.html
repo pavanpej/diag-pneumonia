@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Pneumonia Detection</title>
+	<link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+	<div class="container">
+		<form action="/predict" method="POST">
+			<div class="form-group">
+				<label for="img">Insert A Chest X-Ray Image</label>
+				<input type="file" accept="image/*,.jpeg,.jpg,.png" name="img" id="img" enctype="multipart/form-data">
+				<button type="submit" class="btn btn-outline-primary">Predict</button>
+			</div>
+		</form>
+		<div id="output-container">
+			<p id="output"></p>
+		</div>
+	</div>
+	{{msg}}
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+	<script src="/static/index.js"></script>
+</body>
+</html>
