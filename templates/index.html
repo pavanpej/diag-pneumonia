@@ -17,11 +17,12 @@
 				</div>
 			</form>
 			<div id="output-container">
-				<p id="output"></p>
+				{% if data.success == True %}
+				<p id="output">{{data.class}}</p>
+				{% endif %}
 			</div>
 		</div>
-		{{msg}}
-		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+		{{data.msg}}
 		<script src="/static/index.js"></script>
 	</body>
 
