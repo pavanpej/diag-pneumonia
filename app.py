@@ -9,7 +9,7 @@ import logging
 from werkzeug.utils import secure_filename
 
 # tensorflow dependency setup
-import tensorflow as tf
+# import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import img_to_array
@@ -21,20 +21,20 @@ import numpy as np
 img_width, img_height = 224, 224
 
 # load the model
-model = load_model('static/example.h5')
-model.compile(loss='binary_crossentropy',
-              optimizer='rmsprop',
-              metrics=['accuracy'])
+# model = load_model('static/example.h5')
+# model.compile(loss='binary_crossentropy',
+#               optimizer='rmsprop',
+#               metrics=['accuracy'])
 
 # load images
-img = image.load_img('chest_xray/val/VIRAL/person994_virus_1672.jpeg', target_size=(img_width, img_height))
-x = image.img_to_array(img)
-x = np.expand_dims(x, axis=0)
+# img = image.load_img('chest_xray/val/VIRAL/person994_virus_1672.jpeg', target_size=(img_width, img_height))
+# x = image.img_to_array(img)
+# x = np.expand_dims(x, axis=0)
 
 # predict classes
-images = np.vstack([x])
-classes = model.predict_classes(images, batch_size=10)
-print(classes)
+# images = np.vstack([x])
+# classes = model.predict_classes(images, batch_size=10)
+# print(classes)
 
 # set the upload folder
 UPLOAD_FOLDER = 'static/upload/'
@@ -89,8 +89,16 @@ def predict():
     if request.method == "POST":
         if request.files.get("img"):
             # read the image in PIL format
-            image = request.files["img"].read()
-            image = Image.open(io.BytesIO(image))
+            # image = request.files["img"].read()
+            # image = Image.open(io.BytesIO(image))
+
+            # store image in directory and load it back to model
+            image = request.files["img"]
+            filename = secure_filename(image.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image.save(filepath)
+
+            image = image.load_img(filepath, target_size=(img_width, img_height))
 
             # preprocess the image and prepare it for classification
             image = prepare_image(image, target=(img_width, img_height))
@@ -122,6 +130,10 @@ def predict():
 
 # run the Flask application
 if __name__ == "__main__":
+    app.logger.info("Loading the Keras model and starting Flask server, please wait...")
+    # load model
+    load_model()
+    # run server
     app.run(
         host='0.0.0.0', 
         port=9000, 
