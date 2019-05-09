@@ -1,3 +1,5 @@
 Flask
 uwsgi
 tensorflow
+Pillow
+numpy
