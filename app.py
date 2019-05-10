@@ -20,12 +20,13 @@ import numpy as np
 # dimensions of chest x-ray images
 img_width, img_height = 224, 224
 
-# set the upload folder
-UPLOAD_FOLDER = 'static/upload/'
+# set the path variables
+PATH_UPLOAD_FOLDER = 'static/upload/'
+PATH_MODEL = 'static/models/model_xray.h5'
 
 # initialize the Flask app with config
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PATH_UPLOAD_FOLDER'] = PATH_UPLOAD_FOLDER
 
 # configure the logger
 if 'DYNO' in os.environ:
@@ -61,7 +62,7 @@ def initial():
 @app.route("/predict", methods=["POST"])
 def predict():
   # initialize the data dictionary that will be
-  # returned from the view
+  # returned
   data = {"success": False}
 
   # ensure an image was properly uploaded to our endpoint
@@ -70,7 +71,7 @@ def predict():
 
       # load the stored Pneumonia Keras model, which was
       # previously trained separately
-      model = load_model('static/models/model_xray.h5')
+      model = load_model(PATH_MODEL)
       
       # compile the model for prediction
       model.compile(
@@ -99,7 +100,8 @@ def predict():
       # indicate that the request was a success, and load 
       # the predictions for the template
       data["success"] = True
-      data["predictions"] = preds
+      # convert Numpy Array to Python list to make it JSON serializable
+      data["predictions"] = preds.tolist()
       data["class"] = "No class predicted"
       data["msg"] = "Prediction done."
 
@@ -114,7 +116,8 @@ def predict():
       # log the data variable
       app.logger.debug(data);
 
-  return render_template("index.html", data=data)
+  # return render_template("index.html", data=data)
+  return jsonify(data)
 
 # run the Flask application
 if __name__ == "__main__":
@@ -150,7 +153,7 @@ if __name__ == "__main__":
 # # read the image, and store in filesystem
 # input_image = request.files["img"]
 # filename = secure_filename(input_image.filename)
-# filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+# filepath = os.path.join(app.config['PATH_UPLOAD_FOLDER'], filename)
 # input_image.save(filepath)
 # input_image = image.load_img(filepath, target_size=(img_width, img_height))
 # -----------------------------
