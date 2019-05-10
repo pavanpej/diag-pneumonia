@@ -1,29 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 
-	<head>
-		<meta charset="utf-8">
-		<title>Pneumonia Detection</title>
-		<link rel="stylesheet" href="/static/index.css">
-	</head>
+  <head>
+    <meta charset="utf-8">
+    <title>Pneumonia Detection</title>
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+  </head>
 
-	<body>
-		<div class="container">
-			<form action="/predict" method="POST" enctype="multipart/form-data">
-				<div class="form-group">
-					<label for="img">Insert A Chest X-Ray Image</label>
-					<input type="file" accept="image/*,.jpeg,.jpg,.png" name="img" id="img">
-					<button type="submit" class="btn btn-outline-primary">Predict</button>
-				</div>
-			</form>
-			<div id="output-container">
-				{% if data.success == True %}
-				<p id="output">{{data.class}}</p>
-				{% endif %}
-			</div>
-		</div>
-		{{data.msg}}
-		<script src="/static/index.js"></script>
-	</body>
+  <body>
+    <div class="container">
+      <div class="jumbotron mt-4">
+        <div class="header-container">
+          <h1 class="display-4 text-primary">DiagPneumonia</h1>
+          <p class="lead text-primary">Upload a chest chest X-Ray image below, and see if you have pneumonia
+            or not.</p>
+          <hr class="my-5">
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="content-container">
+              <div class="info-container mb-4">
+                <p class="text-justify">Pneumonia is an inflammatory condition of the lung affecting primarily the small
+                  air sacs known as alveoli. Typically symptoms include some combination of productive or dry cough,
+                  chest pain, fever, and trouble breathing. Severity is variable.</p>
+                <a href="https://en.wikipedia.org/wiki/Pneumonia" class="btn btn-outline-dark">Learn More</a>
+              </div>
+              <div id="output-container" class="output-container">
+                <p class="text-muted">The classes that will be detected are by our neural network are: Normal, Viral,
+                  and Bacterial.</p>
+                <small class="output mb-1">Class detected</small>
+                <div id="classOutput" class="text-light">
+                  No Output
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-container">
+              <form action="" method="POST" enctype="multipart/form-data">
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="imageInputGroup">Upload the X-Ray</span>
+                  </div>
+                  <div class="custom-file text-center">
+                    <input type="file" class="custom-file-input" aria-describedby="imageInputGroup" id="img" name="img"
+                      accept="image/*,.jpeg,.jpg,.png">
+                    <label class="custom-file-label" for="imageInputGroup">Choose File</label>
+                  </div>
+                  <div class="input-group-append">
+                    <button class="btn btn-dark" type="sumbit" id="predictButton">Predict</button>
+                  </div>
+                </div>
+                <div class="img-container d-flex justify-content-center">
+                  <img class="img-thumbnail rounded" src="https://dummyimage.com/350x350/333/ddd" alt="Output Image"
+                    id="outputImg" width="350" height="350">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mx-0 px-4 bg-dark text-muted footer text-center d-flex justify-content-center flex-column mb-3 mt-4">
+      <span class="d-block">A Final Year Project By</span>
+      <div class="name-container mt-2">
+        <a href="#" class="text-dark badge badge-secondary mr-1">Kunal Desai</a>
+        <a href="#" class="text-dark badge badge-secondary mr-1">Kushal Ramakanth</a>
+        <a href="#" class="text-dark badge badge-secondary mr-1">Onkar Madli</a>
+        <a href="#" class="text-dark badge badge-secondary mr-1">Pavan Rao</a>
+      </div>
+      <div class="copyright mt-4 pb-3">
+        &copy; 2019. The DiagPneumonia Team.
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+
+    <!-- Custom JS -->
+    <script src="/static/index.js"></script>
+  </body>
 
 </html>
