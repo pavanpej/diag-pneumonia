@@ -25,7 +25,7 @@ PATH_UPLOAD_FOLDER = 'static/upload/'
 # model_ALL = load_model("static/models/model_xray_v2.h5")
 
 # Load Keras Model -  NORMAL vs PNEUMONIA
-model_NP = load_model("static/models/model_xray1.h5")
+model_NP = load_model("static/models/NormalvsPneumonia-model_xray1.h5")
 
 # Load Keras Model - BACTERIAL vs VIRAL
 model_BV = load_model("static/models/model_xray2.h5")
