@@ -5,22 +5,15 @@ $(document).ready(() => {
   const inputImgId = "#img";
   const outputImgId = "#outputImg";
   const classOutputId = "#classOutput";
-  const classOutputWrapperId = "#classOutputWrapper";
+  const classOutputPneumoniaId = "#classOutputPneumonia";
+  const classOutputPneumoniaWrapperId = "#classOutputPneumoniaWrapper";
   const predictButtonId = "#predictButton";
   const classOutputElement = document.querySelector(classOutputId);
-  const classOutputWrapperElement = document.querySelector(
-    classOutputWrapperId
+  const classOutputPneumoniaElement = document.querySelector(
+    classOutputPneumoniaId
   );
 
-  // for sumbmitting the form
-  $("form").submit(e => {
-    e.preventDefault();
-
-    // disable the button after submitting and put in the loader
-    $(predictButtonId).attr("disabled", true);
-    $(predictButtonId).text("Submitted");
-
-    $(classOutputId).html(`
+  const loaderHTML = `
     Predicting
     <div class="loader-wrapper d-inline">
       <div id="loader" class="lds-ring">
@@ -30,51 +23,81 @@ $(document).ready(() => {
         <div></div>
       </div>
     </div>
-    `);
+    `;
+
+  // initially hide the second output container
+  $(classOutputPneumoniaWrapperId).hide();
+
+  // helper function for POSTing an image
+  const imagePostApi = (route, data, callBack) => {
+    $.ajax({
+      url: route,
+      type: "POST",
+      data: data,
+      processData: false,
+      contentType: false,
+      success: data => callBack(data),
+      error: xhr => console.error(xhr)
+    });
+  };
+
+  // for sumbmitting the form
+  $("form").submit(e => {
+    e.preventDefault();
+
+    // disable the button after submitting and put in the loader
+    $(predictButtonId).attr("disabled", true);
+    $(predictButtonId).text("Submitted");
+    $(classOutputPneumoniaWrapperId).hide(); // hide second container
+    $(classOutputId).html(loaderHTML);
+
+    classOutputElement.classList = "bg-info classOutput";
 
     // load the form data
     const formData = new FormData($("form").get(0));
 
-    $.ajax({
-      url: "/predict",
-      type: "POST",
-      data: formData,
-      processData: false,
-      contentType: false,
-      beforeSend: () => {
-        console.log("In beforeSend()");
-        classOutputElement.classList = "bg-info";
-      },
-      success: data => {
-        console.debug("Data Recieved:");
-        console.dir(data);
-        if (data.success == true) {
-          $(classOutputId).html(data.class);
-          $(predictButtonId).removeAttr("disabled");
-          $(predictButtonId).html("Submit");
+    imagePostApi("/predict/NP", formData, data => {
+      console.debug("NP Data Recieved:");
+      console.dir(data);
+      if (data.success == true) {
+        $(classOutputId).html(data.class);
 
-          switch (data.prediction) {
-            case 0: // Normal Class
-              classOutputElement.classList = "bg-success";
-              break;
-            case 1: // Bacterial class
-            case 2: // Viral class
-              classOutputElement.classList = "bg-custom-danger";
-              break;
-            default:
-              classOutputElement.classList = "bg-info";
-          }
+        switch (data.prediction) {
+          case 0: // Normal Class
+            $(predictButtonId).removeAttr("disabled");
+            $(predictButtonId).html("Submit");
+            classOutputElement.classList = "bg-success classOutput";
+            break;
+          case 1: // Pneumonia class
+            classOutputElement.classList = "bg-custom-danger classOutput";
+            $(classOutputPneumoniaWrapperId).show();
+            $(classOutputPneumoniaId).html(loaderHTML);
 
-        } else {
-          console.error("Some Error Occurred at Client");
+            // call second model in case of pneumonia
+            imagePostApi("/predict/BV", formData, data => {
+              console.debug("BV Data Recieved:");
+              console.dir(data);
+              if (data.success == true) {
+                $(classOutputPneumoniaId).html(data.class);
+                $(predictButtonId).removeAttr("disabled");
+                $(predictButtonId).html("Submit");
+                classOutputPneumoniaElement.classList =
+                  "bg-primary classOutput";
+              } else {
+                console.error("Some Error Occurred at Client (BV)");
+              }
+            });
+            break;
+          default:
+            classOutputElement.classList = "bg-info classOutput";
         }
-      },
-      error: xhr => {
-        console.error(xhr);
+      } else {
+        console.error("Some Error Occurred at Client (NP)");
       }
     });
   });
 
+  // for displaying the image preview
   $(inputImgId).on("change", e => {
     const input = e.target;
     const fileName = $(input)
