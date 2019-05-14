@@ -55,11 +55,12 @@ def predictNP():
   # initialize the data dictionary that will be
   # returned back to the view
   data = {
-    "success": False,
     "class": "No Class Predicted",
+    "confidence": 0.0,
+    "error": "",
     "msg": "Prediction 1 Pending",
     "prediction": -1,
-    "error": ""
+    "success": False
   }
 
   # ensure an image was properly uploaded to our endpoint
@@ -86,22 +87,24 @@ def predictNP():
           get_session().run(tf.global_variables_initializer())
 
           # classify whether the image class is normal or pneumonia
-          preds = model_NP.predict_classes(input_image)
+          preds = model_NP.predict(input_image).tolist()[0]
+          predClass = int(np.argmax(preds))
+
+          data["confidence"] = '%.2f' % (preds[predClass]*100)
+          data["msg"] = "Prediction done"
           
           # If predicted class is NORMAL
-          if preds[0] == 0:
+          if predClass == 0:
             data["success"] = True
             data["class"] = "Normal"
-            data["msg"] = "Prediction done"
             data["prediction"] = 0
             app.logger.debug(data); # log the data variable
             return jsonify(data), 200 # send data back to view
 
           # If predicted class is PNEUMONIA
-          elif preds[0] == 1:
+          elif predClass == 1:
             data["success"] = True
             data["class"] = "Pneumonia"
-            data["msg"] = "Prediction done"
             data["prediction"] = 1
             app.logger.debug(data); # log the data variable
             return jsonify(data), 200 # send data back to view
@@ -155,22 +158,24 @@ def predictBV():
           get_session().run(tf.global_variables_initializer())
 
           # classify whether the image class is normal or pneumonia
-          preds = model_BV.predict_classes(input_image)
+          preds = model_BV.predict(input_image).tolist()[0]
+          predClass = int(np.argmax(preds))
+          
+          data["confidence"] = '%.2f' % (preds[predClass]*100)
+          data["msg"] = "Prediction done"
           
           # If predicted class is NORMAL
-          if preds[0] == 0:
+          if predClass == 0:
             data["success"] = True
             data["class"] = "Bacterial"
-            data["msg"] = "Prediction done"
             data["prediction"] = 0
             app.logger.debug(data); # log the data variable
             return jsonify(data), 200 # send data back to view
 
           # If predicted class is PNEUMONIA
-          elif preds[0] == 1:
+          elif predClass == 1:
             data["success"] = True
             data["class"] = "Viral"
-            data["msg"] = "Prediction done"
             data["prediction"] = 1
             app.logger.debug(data); # log the data variable
             return jsonify(data), 200 # send data back to view
