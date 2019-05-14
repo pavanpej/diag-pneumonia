@@ -168,7 +168,7 @@ def predictBV():
         predClass = int(np.argmax(preds))
         print(predClass)
         
-        data["confidence"] = '%.2f' % (preds[predClass]*100)
+        # data["confidence"] = '%.2f' % (preds[predClass]*100)
         data["msg"] = "Prediction done"
         
         # If predicted class is NORMAL
