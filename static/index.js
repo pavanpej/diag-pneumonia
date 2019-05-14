@@ -16,8 +16,8 @@ $(document).ready(() => {
     classOutputPneumoniaId
   );
 
-  const confidenceNPId = "#confidenceNP";
-  const confidenceBVId = "#confidenceBV";
+  // const confidenceNPId = "#confidenceNP";
+  // const confidenceBVId = "#confidenceBV";
 
   const loaderHTML = `
     Predicting
@@ -67,7 +67,7 @@ $(document).ready(() => {
       console.dir(data);
       if (data.success == true) {
         $(classTextId).html(data.class);
-        $(confidenceNPId).html(data.confidence);
+        // $(confidenceNPId).html(data.confidence);
 
         switch (data.prediction) {
           case 0: // Normal Class
@@ -86,7 +86,7 @@ $(document).ready(() => {
               console.dir(data);
               if (data.success == true) {
                 $(classTextPneumoniaId).html(data.class);
-                $(confidenceBVId).html(data.confidence);
+                // $(confidenceBVId).html(data.confidence);
                 $(predictButtonId).removeAttr("disabled");
                 $(predictButtonId).html("Submit");
                 classOutputPneumoniaElement.classList =
