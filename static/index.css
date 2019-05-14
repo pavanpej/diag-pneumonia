@@ -43,6 +43,13 @@ body {
   box-shadow: 0 5px 45px -30px #000, 0 15px 15px -25px #000;
 }
 
+.classOutput small {
+  font-size: 1rem;
+  letter-spacing: 0;
+  line-height: 2;
+  display: block;
+}
+
 @media only screen and (min-width: 768px) {
   .form-container {
     border-left: 1px solid var(--dark) !important;
