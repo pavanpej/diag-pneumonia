@@ -6,12 +6,18 @@ $(document).ready(() => {
   const outputImgId = "#outputImg";
   const classOutputId = "#classOutput";
   const classOutputPneumoniaId = "#classOutputPneumonia";
+  const classTextId = "#classText";
+  const classTextPneumoniaId = "#classTextPneumonia";
   const classOutputPneumoniaWrapperId = "#classOutputPneumoniaWrapper";
   const predictButtonId = "#predictButton";
+
   const classOutputElement = document.querySelector(classOutputId);
   const classOutputPneumoniaElement = document.querySelector(
     classOutputPneumoniaId
   );
+
+  const confidenceNPId = "#confidenceNP";
+  const confidenceBVId = "#confidenceBV";
 
   const loaderHTML = `
     Predicting
@@ -49,7 +55,7 @@ $(document).ready(() => {
     $(predictButtonId).attr("disabled", true);
     $(predictButtonId).text("Submitted");
     $(classOutputPneumoniaWrapperId).hide(); // hide second container
-    $(classOutputId).html(loaderHTML);
+    $(classTextId).html(loaderHTML);
 
     classOutputElement.classList = "bg-info classOutput";
 
@@ -60,7 +66,8 @@ $(document).ready(() => {
       console.debug("NP Data Recieved:");
       console.dir(data);
       if (data.success == true) {
-        $(classOutputId).html(data.class);
+        $(classTextId).html(data.class);
+        $(confidenceNPId).html(data.confidence);
 
         switch (data.prediction) {
           case 0: // Normal Class
@@ -71,14 +78,15 @@ $(document).ready(() => {
           case 1: // Pneumonia class
             classOutputElement.classList = "bg-custom-danger classOutput";
             $(classOutputPneumoniaWrapperId).show();
-            $(classOutputPneumoniaId).html(loaderHTML);
+            $(classTextPneumoniaId).html(loaderHTML);
 
             // call second model in case of pneumonia
             imagePostApi("/predict/BV", formData, data => {
               console.debug("BV Data Recieved:");
               console.dir(data);
               if (data.success == true) {
-                $(classOutputPneumoniaId).html(data.class);
+                $(classTextPneumoniaId).html(data.class);
+                $(confidenceBVId).html(data.confidence);
                 $(predictButtonId).removeAttr("disabled");
                 $(predictButtonId).html("Submit");
                 classOutputPneumoniaElement.classList =
