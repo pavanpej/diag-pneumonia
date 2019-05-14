@@ -50,14 +50,14 @@ def initial():
   return render_template("index.html", data=data)
 
 # route to handle the uploaded image
-@app.route("/predict", methods=["POST"])
-def predict():
+@app.route("/predict/NP", methods=["POST"])
+def predictNP():
   # initialize the data dictionary that will be
   # returned back to the view
   data = {
     "success": False,
     "class": "No Class Predicted",
-    "msg": "Prediction Pending",
+    "msg": "Prediction 1 Pending",
     "prediction": -1,
     "error": ""
   }
@@ -80,7 +80,7 @@ def predict():
 
         # load the graph object, and models that are stored globally,
         # and use that graph for getting the model in each thread
-        global graph, model_NP, model_BV
+        global graph, model_NP
         with graph.as_default():
           # initialize parameters required for Tensor processing
           get_session().run(tf.global_variables_initializer())
@@ -99,24 +99,12 @@ def predict():
 
           # If predicted class is PNEUMONIA
           elif preds[0] == 1:
-            # predict class of pneumonia using second model
-            preds_bv = model_BV.predict_classes(input_image)
             data["success"] = True
+            data["class"] = "Pneumonia"
             data["msg"] = "Prediction done"
-
-            # If predicted class is BACTERIAL PNEUMONIA
-            if preds_bv[0] == 0:
-              data["class"] = "Bacterial"
-              data["prediction"] = 1
-              app.logger.debug(data); # log the data variable
-              return jsonify(data), 200 # send data back to view
-
-            # If predicted class is VIRAL PNEUMONIA
-            elif preds_bv[0] == 1:
-              data["class"] = "Viral"
-              data["prediction"] = 2
-              app.logger.debug(data); # log the data variable
-              return jsonify(data), 200 # send data back to view
+            data["prediction"] = 1
+            app.logger.debug(data); # log the data variable
+            return jsonify(data), 200 # send data back to view
 
       # If Exception or Error in server
       except Exception as e:
@@ -126,6 +114,75 @@ def predict():
 
   else:
     app.logger.info("Non POST request at /predict")
+    data["msg"] = "Not a POST request"
+    data["error"] = "Forbidden"
+    return jsonify(data), 403
+
+# route to handle the uploaded image
+@app.route("/predict/BV", methods=["POST"])
+def predictBV():
+  # initialize the data dictionary that will be
+  # returned back to the view
+  data = {
+    "success": False,
+    "class": "No Class Predicted",
+    "msg": "Prediction 2 Pending",
+    "prediction": -1,
+    "error": ""
+  }
+
+  # ensure an image was properly uploaded to our endpoint
+  if request.method == "POST":
+    if request.files.get("img"):
+
+      try:
+        # read the image in PIL format directly from 
+        # the obtained Flask request object
+        input_image = request.files["img"].read()
+        input_image = Image.open(io.BytesIO(input_image))
+
+        # convert image to Keras readable format
+        # which is a Numpy array
+        input_image = img_to_array(input_image)
+        input_image = np.resize(input_image, (img_width, img_height, 3))
+        input_image = np.expand_dims(input_image, axis=0)
+
+        # load the graph object, and models that are stored globally,
+        # and use that graph for getting the model in each thread
+        global graph, model_BV
+        with graph.as_default():
+          # initialize parameters required for Tensor processing
+          get_session().run(tf.global_variables_initializer())
+
+          # classify whether the image class is normal or pneumonia
+          preds = model_BV.predict_classes(input_image)
+          
+          # If predicted class is NORMAL
+          if preds[0] == 0:
+            data["success"] = True
+            data["class"] = "Bacterial"
+            data["msg"] = "Prediction done"
+            data["prediction"] = 0
+            app.logger.debug(data); # log the data variable
+            return jsonify(data), 200 # send data back to view
+
+          # If predicted class is PNEUMONIA
+          elif preds[0] == 1:
+            data["success"] = True
+            data["class"] = "Viral"
+            data["msg"] = "Prediction done"
+            data["prediction"] = 1
+            app.logger.debug(data); # log the data variable
+            return jsonify(data), 200 # send data back to view
+
+      # If Exception or Error in server
+      except Exception as e:
+        data["error"] = "Some Server Error Occurred in /predict/BV"
+        app.logger.error(str(e))
+        return jsonify(data), 500
+
+  else:
+    app.logger.info("Non POST request at /predict/BV")
     data["msg"] = "Not a POST request"
     data["error"] = "Forbidden"
     return jsonify(data), 403
