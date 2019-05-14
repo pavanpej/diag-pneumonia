@@ -25,11 +25,11 @@ PATH_UPLOAD_FOLDER = 'static/upload/'
 # model_ALL = load_model("static/models/model_xray_v2.h5")
 
 # Load Keras Model -  NORMAL vs PNEUMONIA
-# model_NP = load_model("static/models/NormalvsPneumonia-model_xray1.h5")
+model_NP = load_model("static/models/NormalvsPneumonia-model_xray1.h5")
 #model_NP = load_model("static/models/best_model_xray1.h5")
 
 # Load Keras Model - BACTERIAL vs VIRAL
-# model_BV = load_model("static/models/model_xray2.h5")
+model_BV = load_model("static/models/model_xray2.h5")
 
 # load TensorFlow Graph for global model loading
 graph = tf.get_default_graph()
@@ -82,33 +82,33 @@ def predictNP():
 
         # load the graph object, and models that are stored globally,
         # and use that graph for getting the model in each thread
-        # global graph, model_NP
-        # with graph.as_default():
+        global graph, model_NP
+        with graph.as_default():
           # initialize parameters required for Tensor processing
-        	# get_session().run(tf.global_variables_initializer())
-        model_NP = load_model("static/models/NormalvsPneumonia-model_xray1.h5")
-        # classify whether the image class is normal or pneumonia
-        preds = model_NP.predict(input_image).tolist()[0]
-        predClass = int(np.argmax(preds))
+          get_session().run(tf.global_variables_initializer())
 
-        data["confidence"] = '%.2f' % (preds[predClass]*100)
-        data["msg"] = "Prediction done"
-        
-        # If predicted class is NORMAL
-        if predClass == 0:
-          data["success"] = True
-          data["class"] = "Normal"
-          data["prediction"] = 0
-          app.logger.debug(data); # log the data variable
-          return jsonify(data), 200 # send data back to view
+          # classify whether the image class is normal or pneumonia
+          preds = model_NP.predict(input_image).tolist()[0]
+          predClass = int(np.argmax(preds))
 
-        # If predicted class is PNEUMONIA
-        elif predClass == 1:
-          data["success"] = True
-          data["class"] = "Pneumonia"
-          data["prediction"] = 1
-          app.logger.debug(data); # log the data variable
-          return jsonify(data), 200 # send data back to view
+          data["confidence"] = '%.2f' % (preds[predClass]*100)
+          data["msg"] = "Prediction done"
+          
+          # If predicted class is NORMAL
+          if predClass == 0:
+            data["success"] = True
+            data["class"] = "Normal"
+            data["prediction"] = 0
+            app.logger.debug(data); # log the data variable
+            return jsonify(data), 200 # send data back to view
+
+          # If predicted class is PNEUMONIA
+          elif predClass == 1:
+            data["success"] = True
+            data["class"] = "Pneumonia"
+            data["prediction"] = 1
+            app.logger.debug(data); # log the data variable
+            return jsonify(data), 200 # send data back to view
 
       # If Exception or Error in server
       except Exception as e:
@@ -153,33 +153,33 @@ def predictBV():
 
         # load the graph object, and models that are stored globally,
         # and use that graph for getting the model in each thread
-        # global graph, model_BV
-        # with graph.as_default():
-        #   # initialize parameters required for Tensor processing
-        #   get_session().run(tf.global_variables_initializer())
-        model_BV = load_model("static/models/model_xray2.h5")
-        # classify whether the image class is normal or pneumonia
-        preds = model_BV.predict(input_image).tolist()[0]
-        predClass = int(np.argmax(preds))
-        
-        data["confidence"] = '%.2f' % (preds[predClass]*100)
-        data["msg"] = "Prediction done"
-        
-        # If predicted class is NORMAL
-        if predClass == 0:
-          data["success"] = True
-          data["class"] = "Bacterial"
-          data["prediction"] = 0
-          app.logger.debug(data); # log the data variable
-          return jsonify(data), 200 # send data back to view
+        global graph, model_BV
+        with graph.as_default():
+          # initialize parameters required for Tensor processing
+          get_session().run(tf.global_variables_initializer())
 
-        # If predicted class is PNEUMONIA
-        elif predClass == 1:
-          data["success"] = True
-          data["class"] = "Viral"
-          data["prediction"] = 1
-          app.logger.debug(data); # log the data variable
-          return jsonify(data), 200 # send data back to view
+          # classify whether the image class is normal or pneumonia
+          preds = model_BV.predict(input_image).tolist()[0]
+          predClass = int(np.argmax(preds))
+          
+          data["confidence"] = '%.2f' % (preds[predClass]*100)
+          data["msg"] = "Prediction done"
+          
+          # If predicted class is NORMAL
+          if predClass == 0:
+            data["success"] = True
+            data["class"] = "Bacterial"
+            data["prediction"] = 0
+            app.logger.debug(data); # log the data variable
+            return jsonify(data), 200 # send data back to view
+
+          # If predicted class is PNEUMONIA
+          elif predClass == 1:
+            data["success"] = True
+            data["class"] = "Viral"
+            data["prediction"] = 1
+            app.logger.debug(data); # log the data variable
+            return jsonify(data), 200 # send data back to view
 
       # If Exception or Error in server
       except Exception as e:
