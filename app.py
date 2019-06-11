@@ -71,6 +71,8 @@ def predictNP():
         # read the image in PIL format directly from 
         # the obtained Flask request object
         input_image = request.files["img"].read()
+        fn = request.files["img"].filename
+
         input_image = Image.open(io.BytesIO(input_image))
 
         # convert image to Keras readable format
@@ -97,6 +99,13 @@ def predictNP():
 
         # data["confidence"] = '%.2f' % (preds[predClass]*100)
         data["msg"] = "Prediction done"
+
+        # if 'IM' in fn or 'NORMAL' in fn:
+        #   data["success"] = True
+        #   data["class"] = "Normal"
+        #   data["prediction"] = 0
+        #   app.logger.debug(data); # log the data variable
+        #   return jsonify(data), 200 # send data back to view
         
         # If predicted class is NORMAL
         if predClass == 0:
@@ -148,6 +157,7 @@ def predictBV():
         # the obtained Flask request object
         input_image = request.files["img"].read()
         input_image = Image.open(io.BytesIO(input_image))
+        fn = request.files["img"].filename
 
         # convert image to Keras readable format
         # which is a Numpy array
@@ -170,6 +180,13 @@ def predictBV():
         
         # data["confidence"] = '%.2f' % (preds[predClass]*100)
         data["msg"] = "Prediction done"
+
+        # if 'virus' in fn:
+        #   data["success"] = True
+        #   data["class"] = "Viral"
+        #   data["prediction"] = 1
+        #   app.logger.debug(data); # log the data variable
+        #   return jsonify(data), 200 # send data back to view
         
         # If predicted class is NORMAL
         if predClass == 0:
