@@ -34,12 +34,18 @@ if True:
 # model_ALL = load_model("static/models/model_xray_v2.h5")
 
 # Load Keras Model -  NORMAL vs PNEUMONIA
-# model_NP = load_model("static/models/NormalvsPneumonia-model_xray1.h5")
-model_NP = load_model("static/models/model_xray1.h5")
+model_NP = load_model("static/models/NormalvsPneumonia-model_xray1.h5")
+model_NP.compile(loss='binary_crossentropy',
+              optimizer='rmsprop',
+              metrics=['accuracy'])
+# model_NP = load_model("static/models/model_xray1.h5")
 print("---------------First model loaded---------------")
 
 # Load Keras Model - BACTERIAL vs VIRAL
 model_BV = load_model("static/models/model_xray2.h5")
+model_BV.compile(loss='binary_crossentropy',
+              optimizer='rmsprop',
+              metrics=['accuracy'])
 print("---------------Second model loaded---------------")
 
 # load TensorFlow Graph for global model loading
@@ -76,13 +82,15 @@ def predictNP():
         input_image = request.files["img"].read()
         fn = request.files["img"].filename
 
-        input_image = Image.open(io.BytesIO(input_image))
+        input_img = Image.open(io.BytesIO(input_image))
+        # input_img = image.load_img(PATH_UPLOAD_FOLDER+fn, target_size=(img_width, img_height))
 
         # convert image to Keras readable format
         # which is a Numpy array
-        input_image = img_to_array(input_image)
+        input_image = img_to_array(input_img)
         input_image = np.resize(input_image, (img_width, img_height, 3))
         input_image = np.expand_dims(input_image, axis=0)
+        final_image = np.vstack([input_image])
 
         # load the graph object, and models that are stored globally,
         # and use that graph for getting the model in each thread
@@ -94,7 +102,7 @@ def predictNP():
           model_NP = load_model("static/models/NormalvsPneumonia-model_xray1.h5")
           # model_NP.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
           # classify whether the image class is normal or pneumonia
-          preds = model_NP.predict(input_image)
+          preds = model_NP.predict(final_image)
           print(preds)
           predClass = int(np.argmax(preds))
           # predClass = model_NP.predict_classes(input_image)[0]
@@ -102,13 +110,6 @@ def predictNP():
 
           # data["confidence"] = '%.2f' % (preds[predClass]*100)
           data["msg"] = "Prediction done"
-
-          # if 'IM' in fn or 'NORMAL' in fn:
-          #   data["success"] = True
-          #   data["class"] = "Normal"
-          #   data["prediction"] = 0
-          #   app.logger.debug(data); # log the data variable
-          #   return jsonify(data), 200 # send data back to view
           
           # If predicted class is NORMAL
           if predClass == 0:
@@ -167,6 +168,7 @@ def predictBV():
         input_image = img_to_array(input_image)
         input_image = np.resize(input_image, (img_width, img_height, 3))
         input_image = np.expand_dims(input_image, axis=0)
+        final_image = np.vstack([input_image])
 
         # load the graph object, and models that are stored globally,
         # and use that graph for getting the model in each thread
@@ -176,20 +178,13 @@ def predictBV():
           # get_session().run(tf.global_variables_initializer())
           model_BV = load_model("static/models/model_xray2.h5")
           # classify whether the image class is normal or pneumonia
-          preds = model_BV.predict(input_image)
+          preds = model_BV.predict(final_image)
           print(preds)
           predClass = int(np.argmax(preds))
           print(predClass)
           
           # data["confidence"] = '%.2f' % (preds[predClass]*100)
           data["msg"] = "Prediction done"
-
-          # if 'virus' in fn:
-          #   data["success"] = True
-          #   data["class"] = "Viral"
-          #   data["prediction"] = 1
-          #   app.logger.debug(data); # log the data variable
-          #   return jsonify(data), 200 # send data back to view
           
           # If predicted class is NORMAL
           if predClass == 0:
